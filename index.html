@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eFootball Mobile | Player Builder</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1020;color:#fff;font-family:Arial,sans-serif}
+header{background:#121b30;padding:24px 16px;text-align:center;border-bottom:2px solid #32d69a}
+h1{color:#36dfa2;font-size:27px;margin:5px}
+p{color:#b9c6d8}
+main{max-width:700px;margin:auto;padding:18px}
+.panel{background:#151e32;padding:18px;border-radius:14px;margin:15px 0}
+input,select,button{width:100%;padding:13px;margin:7px 0;border-radius:9px;border:1px solid #34435b;background:#0b1325;color:white;font-size:16px}
+button{background:#13a875;border:0;font-weight:bold;cursor:pointer}
+.card{border:1px solid #35dba0;border-radius:12px;padding:15px;margin-top:12px}
+.stat{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #29364b}
+.small{font-size:13px;color:#aab8ca}
+</style>
+</head>
+<body>
+<header>
+<h1>⚽ eFootball Mobile</h1>
+<p>اختار اللاعب والبطاقة ديالك واكتشف اقتراحات التطوير</p>
+</header>
+<main>
+<div class="panel">
+<h2>🔎 قلب على اللاعب</h2>
+<input id="search" placeholder="كتب اسم اللاعب: Messi, Mbappe..." />
+<button onclick="findPlayer()">بحث عن اللاعب</button>
+<div id="results"></div>
+</div>
+<div class="panel">
+<h2>🧠 إعدادات التطوير</h2>
+<label>اختار المدرب</label>
+<select id="coach">
+<option value="balanced">مدرب متوازن</option>
+<option value="attack">مدرب هجومي</option>
+<option value="speed">مدرب السرعة</option>
+</select>
+<label>المركز ديال اللاعب</label>
+<select id="position">
+<option>CF - رأس حربة</option>
+<option>SS - مهاجم ثاني</option>
+<option>RWF - جناح أيمن</option>
+<option>LWF - جناح أيسر</option>
+<option>AMF - وسط هجومي</option>
+<option>CMF - وسط</option>
+<option>DMF - وسط دفاعي</option>
+<option>CB - قلب دفاع</option>
+<option>LB - ظهير أيسر</option>
+<option>RB - ظهير أيمن</option>
+<option>GK - حارس</option>
+</select>
+<button onclick="build()">اقترح التطوير</button>
+<div id="buildResult"></div>
+</div>
+<p class="small">نسخة تجريبية غير رسمية. خاص التحقق من إحصائيات كل بطاقة قبل اعتماد توزيع النقاط.</p>
+</main>
+<script>
+const players=[
+{name:"Lionel Messi",aliases:["messi","ميسي"],position:"RWF",rating:99,type:"بطاقة تجريبية"},
+{name:"Kylian Mbappe",aliases:["mbappe","مبابي"],position:"CF",rating:99,type:"بطاقة تجريبية"},
+{name:"Cristiano Ronaldo",aliases:["ronaldo","رونالدو"],position:"CF",rating:98,type:"بطاقة تجريبية"},
+{name:"Neymar Jr",aliases:["neymar","نيمار"],position:"LWF",rating:97,type:"بطاقة تجريبية"},
+{name:"Lamine Yamal",aliases:["yamal","يامال"],position:"RWF",rating:95,type:"بطاقة تجريبية"}
+];
+let selected=null;
+function findPlayer(){
+let q=document.getElementById('search').value.trim().toLowerCase();
+let found=players.filter(p=>p.name.toLowerCase().includes(q)||p.aliases.some(a=>a.includes(q)));
+let el=document.getElementById('results');
+if(!q){el.innerHTML="<p>كتب اسم اللاعب أولا.</p>";return}
+if(!found.length){el.innerHTML="<p>ما لقيناش هاد اللاعب فقاعدة البيانات التجريبية.</p>";return}
+el.innerHTML=found.map((p,i)=>`<div class="card"><h3>${p.name}</h3><p>${p.type} — التقييم المعروض: ${p.rating}</p><button onclick="choose('${p.name}')">اختار اللاعب</button></div>`).join('');
+}
+function choose(name){
+selected=players.find(p=>p.name===name);
+document.getElementById('results').innerHTML=`<div class="card"><h3>✅ ${selected.name}</h3><p>المركز التجريبي: ${selected.position}</p><p>اختار المدرب والمركز لتشوف اقتراح التطوير.</p></div>`;
+}
+function build(){
+let el=document.getElementById('buildResult');
+if(!selected){el.innerHTML="<p>قلب على لاعب واختارو أولا.</p>";return}
+let coach=document.getElementById('coach').value;
+let pos=document.getElementById('position').value;
+let plan=coach==='speed'?
+[['السرعة',8],['التسارع',8],['المراوغة',6],['التسديد',4]]:
+coach==='attack'?
+[['التسديد',8],['قوة التسديد',6],['المراوغة',6],['السرعة',5]]:
+[['المراوغة',7],['التمرير',6],['التسديد',5],['السرعة',5]];
+el.innerHTML=`<div class="card"><h3>تطوير مقترح لـ ${selected.name}</h3><p>المركز المختار: ${pos}</p><p>المدرب: ${document.getElementById('coach').selectedOptions[0].text}</p>${plan.map(s=>`<div class="stat"><span>${s[0]}</span><b>${s[1]} نقاط مقترحة</b></div>`).join('')}<p class="small">هاد التوزيع توضيحي فقط، ماشي حساب رسمي أو مضمون للعبة. التطوير الدقيق كيتطلب بيانات البطاقة ومستوى اللاعب.</p></div>`;
+}
+</script>
+</body>
+</html>
